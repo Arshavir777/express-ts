@@ -1,21 +1,35 @@
 import postgres, { Sql } from 'postgres';
 import { Service } from 'typedi';
-import { dbConfig } from '../config/database';
+import { dbConfig } from '../config/database.config';
+import { LoggerService } from '../services';
 
-@Service()
+@Service() // Singleton
 export class PostgresDataSource {
-    private pool: Sql;
+    private connection: Sql;
 
-    constructor() {
-        this.pool = postgres(dbConfig);
+    /**
+     *  Connections are created lazily once a query is created.
+     */
+    constructor(protected logger: LoggerService) {
+        this.connection = postgres(dbConfig);
     }
 
-    public getPool(): Sql {
-        return this.pool;
+    public async checkConnection(): Promise<void> {
+        try {
+            await this.connection`SELECT 1`;
+            this.logger.logInfo('Database connected successfully');
+        } catch (error: any) {
+            this.logger.logError(`Failed to connect to the database: ${error.message}`);
+            throw error;
+        }
     }
 
-    public async disconnect(): Promise<void> {
-        await this.pool.end();
+    public getConnection(): postgres.Sql<any> {
+        return this.connection;
+    }
+
+    public async closeConnection(): Promise<void> {
+        await this.connection.end();
     }
 }
 

@@ -1,11 +1,32 @@
+import 'reflect-metadata';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import App from './app';
+import Application from './app';
+import Container from 'typedi';
+import { LoggerService } from './services';
 
-const PORT = process.env.PORT || 3000;
-const appInstance = new App();
+const logger = Container.get(LoggerService);
+const port = + (process.env.PORT || 3000);
 
-appInstance.app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+async function main() {
+  const app = new Application({ port });
+
+  await app.boot();
+  await app.start()
+
+  function shutdown() {
+    void app.stop().then(() => {
+      logger.logInfo('SIGTERM app stop');
+      process.exit(0);
+    })
+  }
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+
+}
+
+main().catch(err => {
+  logger.logError('Cannot start the application.');
+  process.exit(1);
 });

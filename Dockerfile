@@ -29,4 +29,4 @@ ENV NODE_ENV=production
 ENV PORT=3000
 
 # Step 10: Run migrations and start the app
-CMD ["sh", "-c", "npm run migrate && node dist/server.js"]
+CMD ["sh", "-c", "npm run migrate && npm run seed && node dist/server.js"]

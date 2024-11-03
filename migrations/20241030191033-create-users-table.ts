@@ -8,6 +8,7 @@ export async function up(db: Sql) {
       password VARCHAR(100) NOT NULL,
       first_name VARCHAR(100) NOT NULL,
       last_name VARCHAR(100) NOT NULL,
+      balance NUMERIC(7,2) DEFAULT 0,
       created_at TIMESTAMP DEFAULT NOW()
     );
   `;
