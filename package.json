@@ -1,17 +1,20 @@
 {
   "name": "express-ts-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/server.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "start": "node dist/server.js",
     "build": "tsc",
-    "dev": "nodemon --config nodemon.json",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "tsc-watch --target es2017 --outDir ./dist",
+    "dev": "tsc-watch --target es2017 --outDir ./dist --onSuccess \"node ./dist/server.js\"",
     "lint": "eslint 'src/**/*.{ts,js}'",
     "lint:fix": "eslint 'src/**/*.{ts,js}' --fix",
-    "seed": "ts-node src/seed.ts",
-    "migrate": "ts-node src/migrate.ts",
-    "migrate:down": "ts-node src/migrate.ts --down"
+    "test": "LOG_LEVEL=error jest",
+    "seed": "node dist/seed.js",
+    "migrate": "node dist/migrate.js",
+    "migrate:down": "node dist/migrate.js --down",
+    "worker": "node dist/worker.js"
   },
   "keywords": [
     "express",
@@ -25,12 +28,14 @@
   "dependencies": {
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
+    "bull": "^4.16.4",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "class-validator-jsonschema": "^5.0.1",
     "connect-redis": "^7.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "env-var": "^7.5.0",
     "express": "^4.21.1",
     "express-session": "^1.18.1",
     "postgres": "^3.4.5",
@@ -39,7 +44,6 @@
     "routing-controllers": "^0.10.4",
     "routing-controllers-openapi": "^4.0.0",
     "swagger-ui-express": "^5.0.1",
-    "ts-node": "^10.9.2",
     "typedi": "^0.10.0",
     "winston": "^3.16.0"
   },
@@ -49,6 +53,7 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.0",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.8.4",
     "@types/swagger-ui-express": "^4.1.7",
     "@typescript-eslint/eslint-plugin": "^8.12.2",
@@ -57,8 +62,11 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "globals": "^15.11.0",
-    "nodemon": "^3.1.7",
-    "ts-node-dev": "^2.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "ts-watch": "^1.0.8",
+    "tsc-watch": "^6.2.0",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.12.2"
   }

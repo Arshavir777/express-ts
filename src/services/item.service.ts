@@ -4,14 +4,16 @@ import { Currency } from '../model/item.model';
 import { RedisProvider, SkinPortProvider } from '../providers';
 import { mapTradableAndNonTradablePrices } from '../utils/item-price-mapper';
 import { LoggerService } from './';
-import { ItemsSyncService } from './items-sync.service';
+import { ItemRepository } from '../repositories';
+import { FindItemsDTO } from '../dto';
+import skinPortItemsSyncQueue from '../jobs/sync-api-items.job';
 
 @Service()
 export class ItemService {
   constructor(
     @Inject(() => SkinPortProvider) private skinPortProvider: SkinPortProvider,
     @Inject(() => RedisProvider) private redisProvider: RedisProvider,
-    private itemsSyncService: ItemsSyncService,
+    private itemRepository: ItemRepository,
     private logger: LoggerService
   ) { }
 
@@ -38,12 +40,22 @@ export class ItemService {
 
     const mergedPricesItems = mapTradableAndNonTradablePrices(skinPortItems, skinPortNonTradableItems, appId);
 
-    await this.itemsSyncService.storeSkinPortItems(mergedPricesItems);
-
     if (mergedPricesItems.length) {
       await this.redisProvider.set(cacheKey, JSON.stringify(mergedPricesItems), skinPortConfig.cacheTTL);
+
+      // Send to queue
+      skinPortItemsSyncQueue.add({ cacheKey })
     }
 
     return mergedPricesItems;
+  }
+
+  async getItems(params: FindItemsDTO) {
+    return this.itemRepository.findAll(params)
+  }
+
+
+  test() {
+    return 200;
   }
 }

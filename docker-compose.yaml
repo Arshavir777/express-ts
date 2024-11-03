@@ -6,43 +6,56 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - '${DB_PORT}:${DB_PORT}'
+      - '${PORT}:${PORT}'
     depends_on:
-      - db
-      - cache
+      - postgres
+      - redis
     environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
+      DB_HOST: '${DB_HOST}'
+      DB_PORT: '${DB_PORT}'
+      DB_NAME: '${DB_NAME}'
+      DB_USER: '${DB_USER}'
+      DB_PASSWORD: '${DB_PASSWORD}'
     networks:
       - app-network
     volumes:
       - .:/app
-    # DEV ONLY
-    command: 'npm run dev'
+      - /app/node_modules
 
-  db:
+  postgres:
     image: postgres:15
     environment:
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      POSTGRES_DB: '${DB_NAME}'
+      POSTGRES_USER: '${DB_USER:-admin}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-admin}'
     ports:
-      - '5432:5432'
+      - '${DB_PORT:-5432}:5432'
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - 'pg-data:/var/lib/postgresql/data'
+      - './docker/pgsql/init.sql:/docker-entrypoint-initdb.d/10-init.sql'
     networks:
       - app-network
-  
-  cache:
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - '-q'
+        - '-d'
+        - '${DB_NAME}'
+        - '-U'
+        - '${DB_USER}'
+      retries: 3
+      timeout: 5s
+
+  redis:
     image: redis:6.2-alpine
     restart: always
     ports:
       - '6379:6379'
+    networks:
+      - app-network
     command: redis-server --save 20 1 --loglevel warning
-    volumes: 
+    volumes:
       - redis-data:/data
 
 networks:
@@ -50,5 +63,6 @@ networks:
     driver: bridge
 
 volumes:
-  postgres-data:
+  pg-data:
+    driver: local
   redis-data:

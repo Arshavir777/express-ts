@@ -1,33 +1,35 @@
 import 'reflect-metadata';
 import express from 'express';
-import Container from 'typedi';
+import { Container } from 'typedi';
 import cors from 'cors';
+import { promisify } from 'util';
 import { getMetadataArgsStorage, RoutingControllersOptions, useContainer, useExpressServer } from 'routing-controllers';
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import { routingControllersToSpec } from 'routing-controllers-openapi'
 import * as swaggerUiExpress from 'swagger-ui-express'
 const { defaultMetadataStorage } = require('class-transformer/cjs/storage')
 
-import SessionConfig from './config/session.config';
+import SessionConfig from './core/session-config';
 import { currentUserChecker, authorizationChecker } from './middlewares'
-import { AuthController, ItemController, PurchaseController } from './controllers';
+import { AuthController, ItemsController, PurchaseController } from './controllers';
 import { ErrorHandler } from './middlewares';
 import { PostgresDataSource } from './datasources';
-import { AppOptions } from './types/index';
-import { promisify } from 'util';
+import { ApplicationOptions } from './types/index';
 import { LoggerService } from './services';
 
 class Application {
   private app!: express.Application;
-  private options!: AppOptions;
+  private options: ApplicationOptions = { port: +(process.env.PORT ?? 3000) };
   private logger!: LoggerService;
 
-  constructor(options: AppOptions) {
-    this.options = options;
+  constructor(options?: ApplicationOptions) {
+    if (options) {
+      this.options = options
+    }
     this.logger = Container.get(LoggerService);
   }
 
-  boot() {
+  async boot() {
     this.app = express();
     this.initializeMiddlewares();
     useContainer(Container);
@@ -35,7 +37,7 @@ class Application {
     const routingControllersOptions: RoutingControllersOptions = {
       controllers: [
         AuthController,
-        ItemController,
+        ItemsController,
         PurchaseController
       ],
       routePrefix: '/api',
@@ -95,7 +97,7 @@ class Application {
     const db = Container.get(PostgresDataSource);
     await db.checkConnection();
 
-    const serverListen: any  = promisify(this.app.listen.bind(this.app));
+    const serverListen: any = promisify(this.app.listen.bind(this.app));
     await serverListen(port);
 
     this.logger.logInfo(`App start on port: ${port}`)

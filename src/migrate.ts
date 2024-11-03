@@ -2,8 +2,9 @@ import postgres from 'postgres';
 import fs from 'fs';
 import path from 'path';
 import { Sql } from 'postgres';
-import dotenv from 'dotenv';
-dotenv.config();
+import { registerEnv } from './utils';
+
+registerEnv();
 
 import { dbConfig } from './config/database.config';
 

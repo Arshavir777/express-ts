@@ -1,3 +1,3 @@
-export type AppOptions = {
+export type ApplicationOptions = {
     port: number
 }
