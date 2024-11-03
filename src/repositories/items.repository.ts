@@ -25,7 +25,7 @@ export class ItemRepository {
 
     const offset = (page - 1) * limit;
 
-    let items = await this.sql<Item[]>`
+    const items = await this.sql<Item[]>`
       SELECT * FROM items
       WHERE app_id = ${appId}
       ${search ? this.sql`AND name ILIKE ${'%' + search + '%'}` : this.sql``}
@@ -33,14 +33,6 @@ export class ItemRepository {
     `;
 
     return items
-  }
-
-  async createOne(dto: CreateItemDTO): Promise<Item | null> {
-    const [item] = await this.sql<Item[]>`
-          SELECT *
-          FROM items
-        `;
-    return item || null;
   }
 
   async bulkCreate(items: CreateItemDTO[]): Promise<number> {

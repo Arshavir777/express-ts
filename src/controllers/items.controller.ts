@@ -1,7 +1,7 @@
 
 import { Service } from "typedi";
 import { Get, JsonController, QueryParams } from "routing-controllers";
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, Min } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive } from "class-validator";
 import { ItemService } from "../services/item.service";
 import { Currency } from "../model/item.model";
 import { FindItemsDTO } from "../dto";
@@ -33,6 +33,8 @@ export class ItemsController {
     }
 
     @Get('items')
+    // TODO: open if need auth
+    // @Authorized()
     public async getItems(
         @QueryParams() params: FindItemsDTO,
     ) {

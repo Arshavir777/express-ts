@@ -27,6 +27,6 @@ async function main() {
 }
 
 main().catch(err => {
-  logger.logError('Cannot start the application.');
+  logger.logError(`Cannot start the application: ${err.message}`);
   process.exit(1);
 });

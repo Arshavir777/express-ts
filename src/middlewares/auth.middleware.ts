@@ -1,23 +1,21 @@
 import { Action } from 'routing-controllers';
 import Container from 'typedi';
 import { UserRepository } from '../repositories';
+import { Request } from 'express';
+
+async function getAuthUserFromRequest(request: Request) {
+    if (!request.session?.currentUserId) {
+        return null;
+    }
+    const userRepository = Container.get(UserRepository);
+    return userRepository.findById(request.session.currentUserId);
+}
 
 export const currentUserChecker = async ({ request }: Action) => {
-    if (request.session && request.session.currentUserId) {
-        const userRepository = Container.get(UserRepository);
-        const user = await userRepository.findById(request.session.currentUserId);
-        return user
-    }
-
-    return null;
+    return getAuthUserFromRequest(request);
 }
 
 export const authorizationChecker = async ({ request }: Action) => {
-    if (request.session && request.session.currentUserId) {
-        const userRepository = Container.get(UserRepository);
-        const user = await userRepository.findById(request.session.currentUserId);
-        return Boolean(user);
-    }
-
-    return false;
+    const user = await getAuthUserFromRequest(request);
+    return Boolean(user);
 }

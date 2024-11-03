@@ -6,7 +6,8 @@ export const sessionConfig = {
   saveUninitialized: false,
   cookie: {
     // HTTPS-only in production
-    secure: process.env.NODE_ENV === 'production',
+    // TODO: uncomment on https :)
+    // secure: process.env.NODE_ENV === 'production',
     maxAge: 1000 * 60 * 60 * 24, // 1 day
   },
 }

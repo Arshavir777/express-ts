@@ -1,8 +1,7 @@
 import { Request } from "express";
 import { Service } from "typedi";
-import { Authorized, Body, CurrentUser, JsonController, Post, Req, Session } from "routing-controllers";
+import { Authorized, Body, CurrentUser, JsonController, Post, Req } from "routing-controllers";
 import { OpenAPI } from "routing-controllers-openapi";
-import { type Session as SessionType } from "express-session";
 import { RegisterDTO, LoginDTO, ChangePasswordDTO } from "../dto";
 import { AuthService, LoggerService } from "../services";
 import { User } from "../model";
@@ -51,10 +50,10 @@ export class AuthController {
     @OpenAPI({ security: [{ cookieAuth: [] }] })
     @Post('/logout')
     public async logout(
-        @Session() session: SessionType
+        @Req() { session }: Request
     ) {
         session.destroy((err) => {
-           this.logger.logError(err.message)
+            this.logger.logError(err.message)
         })
         return 'Successfully logged out';
     }

@@ -1,10 +1,11 @@
 
 FROM node:18-alpine
 
+RUN npm install -g pm2
+
 WORKDIR /app
 
 COPY package*.json ./
-
 RUN npm install
 
 COPY . .
@@ -15,5 +16,7 @@ EXPOSE 3000
 
 ENV NODE_ENV=production
 
-# Step 10: Run migrations and start the app
-CMD ["sh", "-c", "npm run migrate && npm run seed && npm run start"]
+RUN chmod +x ./start-with-pm2.sh
+
+# CMD ["sh", "-c", "npm run migrate && npm run seed && npm run start"]
+CMD ["sh", "./start-with-pm2.sh"]

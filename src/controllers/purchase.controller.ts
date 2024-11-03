@@ -1,9 +1,9 @@
 import { Service } from 'typedi';
 import { PurchaseService } from '../services';
+import { OpenAPI } from 'routing-controllers-openapi';
 import { Authorized, Body, CurrentUser, HttpCode, JsonController, Post } from 'routing-controllers';
 import { PurchaseDTO } from '../dto';
 import { User } from '../model';
-import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 @Service()
 @JsonController('/purchase')

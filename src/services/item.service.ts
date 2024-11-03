@@ -6,11 +6,12 @@ import { mapTradableAndNonTradablePrices } from '../utils/item-price-mapper';
 import { LoggerService } from './';
 import { ItemRepository } from '../repositories';
 import { FindItemsDTO } from '../dto';
-import skinPortItemsSyncQueue from '../jobs/sync-api-items.job';
+import createSkinPortItemsSyncQueue from '../jobs/sync-api-items.job';
 
 @Service()
 export class ItemService {
   constructor(
+    // Experiential
     @Inject(() => SkinPortProvider) private skinPortProvider: SkinPortProvider,
     @Inject(() => RedisProvider) private redisProvider: RedisProvider,
     private itemRepository: ItemRepository,
@@ -44,7 +45,7 @@ export class ItemService {
       await this.redisProvider.set(cacheKey, JSON.stringify(mergedPricesItems), skinPortConfig.cacheTTL);
 
       // Send to queue
-      skinPortItemsSyncQueue.add({ cacheKey })
+      createSkinPortItemsSyncQueue().add({ cacheKey })
     }
 
     return mergedPricesItems;

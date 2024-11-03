@@ -8,7 +8,6 @@ export const arrayToChunks = <T>(arr: T[], chunkSize: number = 100) => {
     return chunks;
 }
 
-
 export const registerEnv = (path?: string) => {
-    dotenv.config({ path, override: true, debug: true })
+    dotenv.config({ path, override: true })
 }

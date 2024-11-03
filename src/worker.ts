@@ -4,15 +4,15 @@ dotenv.config();
 
 import { LoggerService } from './services';
 import Container from 'typedi';
-
-const logger = Container.get(LoggerService);
-
-import itemSyncQueue from './jobs/sync-api-items.job'; // Your job queue
+import { createSkinPortItemsSyncQueue } from './jobs/sync-api-items.job';
 import { RedisProvider } from './providers';
 import { ItemsSyncService } from './services/items-sync.service';
 
+const logger = Container.get(LoggerService);
+const queue = createSkinPortItemsSyncQueue();
+
 // Process the job in the worker
-itemSyncQueue.process(async (job) => {
+queue.process(async (job) => {
     const { cacheKey } = job.data;
     logger.logInfo('Running item sync job...',);
 
@@ -29,11 +29,11 @@ itemSyncQueue.process(async (job) => {
     logger.logInfo('Item sync job completed.');
 });
 
-itemSyncQueue.on('completed', (job) => {
+queue.on('completed', (job) => {
     logger.logInfo(`Job ${job.id} completed successfully`);
 });
 
-itemSyncQueue.on('failed', (job, error) => {
+queue.on('failed', (job, error) => {
     logger.logError(`Job ${job.id} failed: ${error.message}`);
 });
 
