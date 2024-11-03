@@ -3,7 +3,7 @@ import { Sql } from 'postgres';
 import { Service } from 'typedi';
 import { CreatePurchaseDTO, PurchaseDTO } from '../dto';
 import { UserRepository, ItemRepository, PurchaseRepository } from '../repositories';
-import { User, Purchase } from '../model';
+import { User } from '../model';
 import { PostgresDataSource } from '../datasources';
 
 @Service()
@@ -15,7 +15,7 @@ export class PurchaseService {
     protected dataSource: PostgresDataSource
   ) { }
 
-  async createPurchase(currentUser: User, purchaseData: PurchaseDTO): Promise<Purchase | null> {
+  async createPurchase(currentUser: User, purchaseData: PurchaseDTO): Promise<number> {
 
     const { itemId, isTradable, quantity } = purchaseData;
     const item = await this.itemRepository.findById(purchaseData.itemId);
@@ -41,14 +41,14 @@ export class PurchaseService {
       isTradable
     )
 
-    const [purchase] = await db.begin(async (tx: Sql) => {
-      const purchase = await this.purchaseRepository.createPurchase(tx, dto);
+    await db.begin(async (tx: Sql) => {
+      await this.purchaseRepository.createPurchase(tx, dto);
       await this.itemRepository.decreaseQuantity(tx, itemId, quantity);
       await this.userRepository.decreaseBalance(tx, currentUser.id, totalPrice);
-
-      return [purchase]
     });
 
-    return purchase;
+    const user = await this.userRepository.findById(currentUser.id);
+
+    return user?.balance || 0;
   }
 }

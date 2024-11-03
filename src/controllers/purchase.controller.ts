@@ -15,13 +15,13 @@ export class PurchaseController {
         security: [{ cookieAuth: [] }],
         responses: {
             '201': {
-                description: 'Successfully purchase',
+                description: 'Successfully purchase, return current balance',
             },
             '400': {
                 description: 'Bad request',
             },
             '422': {
-                description: 'Insufficient balance'
+                description: 'Insufficient balance or item quantity'
             }
         },
     })
@@ -32,6 +32,7 @@ export class PurchaseController {
         @Body() purchaseData: PurchaseDTO,
         @CurrentUser() currentUser: User
     ) {
-        return this.purchaseService.createPurchase(currentUser, purchaseData);
+        const currentBalance = await this.purchaseService.createPurchase(currentUser, purchaseData);
+        return { currentBalance };
     }
 }
